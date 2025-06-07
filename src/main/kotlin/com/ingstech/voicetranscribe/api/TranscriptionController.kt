@@ -66,7 +66,7 @@ class TranscriptionController(
                 )
             }
 
-            val transcription = transcriptionService.transcribeAudioFile(audioData)
+            val transcription = transcriptionService.transcribeLiveAudio(audioData)
             val response = transcription.toResponse()
 
             ResponseEntity.ok(response)

@@ -31,7 +31,6 @@
 		<kotlin.version>1.9.25</kotlin.version>
 	</properties>
 	<dependencies>
-		<!-- Spring Boot Starters -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -70,11 +69,10 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!-- Google Cloud Speech-to-Text -->
+		<!-- JSON Processing -->
 		<dependency>
-			<groupId>com.google.cloud</groupId>
-			<artifactId>google-cloud-speech</artifactId>
-			<version>4.29.0</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- HTTP Client -->
@@ -95,6 +93,13 @@
 			<groupId>org.jcodec</groupId>
 			<artifactId>jcodec</artifactId>
 			<version>0.2.5</version>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
