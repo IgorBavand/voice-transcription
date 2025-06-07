@@ -1,10 +1,10 @@
 package com.ingstech.voicetranscribe.api
 
 import com.ingstech.voicetranscribe.domain.services.TranscriptionService
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
-import java.nio.ByteBuffer
 
 @Controller
 class WebSocketAudioController(
@@ -13,18 +13,16 @@ class WebSocketAudioController(
 ) {
 
     @MessageMapping("/transcribe-audio")
-    fun handleAudioChunk(audioChunkData: ByteBuffer) {
+    fun handleAudioChunk(audioBytes: ByteArray, @Header("content-type") contentType: String?) {
         try {
-            val audioBytes = ByteArray(audioChunkData.remaining())
-            audioChunkData.get(audioBytes)
-
-            val partialTranscription = "Backend processou chunk: ${String(audioBytes.take(10).toByteArray())}... (Timestamp: ${System.currentTimeMillis()})"
-            println("Recebido chunk de áudio, enviando transcrição: $partialTranscription")
+            println("Recebido chunk de áudio binário. Content-Type: $contentType. Tamanho: ${audioBytes.size} bytes.")
+            val partialTranscription = "Backend processou chunk binário (primeiros bytes): ${audioBytes.take(10).joinToString()}... (Timestamp: ${System.currentTimeMillis()})"
+            println("Enviando transcrição: $partialTranscription")
 
             simpMessagingTemplate.convertAndSend("/topic/live-transcription", partialTranscription)
 
         } catch (e: Exception) {
-            println("Erro ao processar chunk de áudio via WebSocket: ${e.message}")
+            println("Erro ao processar chunk de áudio binário via WebSocket: ${e.message}")
             simpMessagingTemplate.convertAndSend("/topic/live-transcription-error", "Erro no servidor: ${e.message}")
         }
     }
