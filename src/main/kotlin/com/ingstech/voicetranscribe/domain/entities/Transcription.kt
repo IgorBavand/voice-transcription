@@ -1,44 +1,52 @@
 package com.ingstech.voicetranscribe.domain.entities
 
 import com.ingstech.voicetranscribe.domain.enums.TranscriptionType
-import jakarta.persistence.Column
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table;
-import lombok.Data
+import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "transcriptions")
-@Data
 data class Transcription(
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
     @Column(nullable = false)
-    val fileName: String,
+    val fileName: String = "",
 
     @Column(nullable = false, length = 10000)
-    val transcribedText: String,
+    val transcribedText: String = "",
 
     @Column(nullable = false)
-    val duration: Double,
+    val duration: Double = 0.0,
 
     @Column(nullable = false)
-    val fileSize: Long,
+    val fileSize: Long = 0,
 
     @Column(nullable = false)
-    val mimeType: String,
+    val mimeType: String = "",
 
     @Column(nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val transcriptionType: TranscriptionType,
+    val transcriptionType: TranscriptionType = TranscriptionType.FILE_UPLOAD,
 
     @Column
     val confidence: Double? = null
-)
+) {
+    // Construtor sem argumentos exigido pelo Hibernate
+    constructor() : this(
+        0L,
+        "",
+        "",
+        0.0,
+        0L,
+        "",
+        LocalDateTime.now(),
+        TranscriptionType.FILE_UPLOAD,
+        null
+    )
+}

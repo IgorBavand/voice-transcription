@@ -1,5 +1,7 @@
 package com.ingstech.voicetranscribe.api
 
+import com.ingstech.voicetranscribe.domain.dto.response.ErrorResponse
+import com.ingstech.voicetranscribe.domain.dto.response.TranscriptionResponse
 import com.ingstech.voicetranscribe.domain.entities.Transcription
 import com.ingstech.voicetranscribe.domain.services.TranscriptionService
 import org.springframework.http.HttpStatus
@@ -7,26 +9,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-data class TranscriptionResponse(
-    val id: Long,
-    val fileName: String,
-    val transcribedText: String,
-    val duration: Double,
-    val fileSize: Long,
-    val mimeType: String,
-    val createdAt: String,
-    val transcriptionType: String,
-    val confidence: Double?
-)
-
-data class ErrorResponse(
-    val message: String,
-    val error: String
-)
-
 @RestController
 @RequestMapping("/api/transcriptions")
-@CrossOrigin(origins = ["http://localhost:4200"])
 class TranscriptionController(
     private val transcriptionService: TranscriptionService
 ) {

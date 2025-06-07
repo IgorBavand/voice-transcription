@@ -1,6 +1,11 @@
 package com.ingstech.voicetranscribe.domain.services
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.ingstech.voicetranscribe.domain.dto.request.GeminiContent
+import com.ingstech.voicetranscribe.domain.dto.request.GeminiInlineData
+import com.ingstech.voicetranscribe.domain.dto.request.GeminiPart
+import com.ingstech.voicetranscribe.domain.dto.request.GeminiRequest
+import com.ingstech.voicetranscribe.domain.dto.response.GeminiResponse
+import com.ingstech.voicetranscribe.domain.dto.response.TranscriptionResult
 import com.ingstech.voicetranscribe.domain.entities.Transcription
 import com.ingstech.voicetranscribe.domain.enums.TranscriptionType
 import com.ingstech.voicetranscribe.infrestructure.TranscriptionRepository
@@ -13,48 +18,6 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.multipart.MultipartFile
 import java.util.*
 import javax.sound.sampled.AudioSystem
-
-data class TranscriptionResult(
-    val text: String,
-    val confidence: Double?,
-    val duration: Double
-)
-
-// Gemini API Request/Response Models
-data class GeminiRequest(
-    val contents: List<GeminiContent>
-)
-
-data class GeminiContent(
-    val parts: List<GeminiPart>
-)
-
-data class GeminiPart(
-    val text: String? = null,
-    @JsonProperty("inline_data")
-    val inlineData: GeminiInlineData? = null
-)
-
-data class GeminiInlineData(
-    @JsonProperty("mime_type")
-    val mimeType: String,
-    val data: String
-)
-
-data class GeminiResponse(
-    val candidates: List<GeminiCandidate>
-)
-
-data class GeminiCandidate(
-    val content: GeminiContent,
-    val finishReason: String? = null,
-    val safetyRatings: List<GeminiSafetyRating>? = null
-)
-
-data class GeminiSafetyRating(
-    val category: String,
-    val probability: String
-)
 
 @Service
 class TranscriptionService(
@@ -98,11 +61,9 @@ class TranscriptionService(
     }
 
     private fun transcribeWithGemini(audioFile: MultipartFile): TranscriptionResult {
-        try {
-            // Converte o áudio para base64
+        return try {
             val base64Audio = Base64.getEncoder().encodeToString(audioFile.bytes)
 
-            // Monta a requisição para o Gemini
             val request = GeminiRequest(
                 contents = listOf(
                     GeminiContent(
@@ -125,32 +86,34 @@ class TranscriptionService(
                 )
             )
 
-            // Configura os headers
-            val headers = HttpHeaders()
-            headers.contentType = MediaType.APPLICATION_JSON
-            headers.accept = listOf(MediaType.APPLICATION_JSON)
+            val headers = HttpHeaders().apply {
+                contentType = MediaType.APPLICATION_JSON
+                accept = listOf(MediaType.APPLICATION_JSON)
+            }
 
             val entity = HttpEntity(request, headers)
-
-            // Faz a requisição para o Gemini
             val url = "$geminiApiUrl?key=$geminiApiKey"
+
             val response = restTemplate.postForObject(url, entity, GeminiResponse::class.java)
 
-            // Extrai o texto transcrito
-            val transcribedText = response?.candidates?.firstOrNull()?.content?.parts?.firstOrNull()?.text?.trim()
+            val transcribedText = response?.candidates
+                ?.firstOrNull()
+                ?.content
+                ?.parts
+                ?.firstOrNull()
+                ?.text
+                ?.trim()
                 ?: "Não foi possível transcrever o áudio"
 
             val duration = getAudioDuration(audioFile)
 
-            return TranscriptionResult(transcribedText, null, duration)
+            TranscriptionResult(transcribedText, null, duration)
 
         } catch (e: Exception) {
-            // Log do erro para debug
             println("Erro ao transcrever com Gemini: ${e.message}")
             e.printStackTrace()
 
-            // Retorna um resultado de erro
-            return TranscriptionResult(
+            TranscriptionResult(
                 "Erro na transcrição: ${e.message}",
                 null,
                 getAudioDuration(audioFile)
@@ -165,7 +128,7 @@ class TranscriptionService(
             "audio/flac" -> "audio/flac"
             "audio/ogg" -> "audio/ogg"
             "audio/webm" -> "audio/webm"
-            else -> "audio/wav" // Default fallback
+            else -> "audio/wav"
         }
     }
 
@@ -180,28 +143,22 @@ class TranscriptionService(
                 0.0
             }
         } catch (e: Exception) {
-            // Se não conseguir obter a duração, estima baseado no tamanho do arquivo
-            (audioFile.size / 32000.0) // Estimativa aproximada para áudio de 16kHz, 16-bit
+            (audioFile.size / 32000.0)
         }
     }
 
-    fun getAllTranscriptions(): List<Transcription> {
-        return transcriptionRepository.findAllByOrderByCreatedAtDesc()
-    }
+    fun getAllTranscriptions(): List<Transcription> =
+        transcriptionRepository.findAllByOrderByCreatedAtDesc()
 
-    fun getTranscriptionById(id: Long): Transcription? {
-        return transcriptionRepository.findById(id).orElse(null)
-    }
+    fun getTranscriptionById(id: Long): Transcription? =
+        transcriptionRepository.findById(id).orElse(null)
 
-    fun deleteTranscription(id: Long) {
+    fun deleteTranscription(id: Long) =
         transcriptionRepository.deleteById(id)
-    }
 
-    fun searchTranscriptions(searchTerm: String): List<Transcription> {
-        return transcriptionRepository.findByTranscribedTextContainingIgnoreCaseOrderByCreatedAtDesc(searchTerm)
-    }
+    fun searchTranscriptions(searchTerm: String): List<Transcription> =
+        transcriptionRepository.findByTranscribedTextContainingIgnoreCaseOrderByCreatedAtDesc(searchTerm)
 
-    fun getTranscriptionsByType(type: TranscriptionType): List<Transcription> {
-        return transcriptionRepository.findByTranscriptionTypeOrderByCreatedAtDesc(type)
-    }
+    fun getTranscriptionsByType(type: TranscriptionType): List<Transcription> =
+        transcriptionRepository.findByTranscriptionTypeOrderByCreatedAtDesc(type)
 }
