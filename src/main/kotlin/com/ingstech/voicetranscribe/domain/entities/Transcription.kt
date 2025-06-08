@@ -37,7 +37,6 @@ data class Transcription(
     @Column
     val confidence: Double? = null
 ) {
-    // Construtor sem argumentos exigido pelo Hibernate
     constructor() : this(
         0L,
         "",
