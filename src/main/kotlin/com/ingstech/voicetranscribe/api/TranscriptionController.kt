@@ -20,13 +20,13 @@ class TranscriptionController(
         return try {
             if (file.isEmpty) {
                 return ResponseEntity.badRequest().body(
-                    ErrorResponse("Arquivo não pode estar vazio", "EMPTY_FILE")
+                    ErrorResponse("File cannot be empty", "EMPTY_FILE")
                 )
             }
 
             if (!isAudioFile(file.contentType)) {
                 return ResponseEntity.badRequest().body(
-                    ErrorResponse("Tipo de arquivo não suportado. Use arquivos de áudio (.wav, .mp3, .flac, .ogg)", "UNSUPPORTED_FILE_TYPE")
+                    ErrorResponse("Unsupported file type. Use audio files (.wav, .mp3, .flac, .ogg)", "UNSUPPORTED_FILE_TYPE")
                 )
             }
 
@@ -37,7 +37,7 @@ class TranscriptionController(
 
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("Erro ao processar transcrição: ${e.message}", "TRANSCRIPTION_ERROR"))
+                .body(ErrorResponse("Error processing transcription: ${e.message}", "TRANSCRIPTION_ERROR"))
         }
     }
 
@@ -46,7 +46,7 @@ class TranscriptionController(
         return try {
             if (audioData.isEmpty) {
                 return ResponseEntity.badRequest().body(
-                    ErrorResponse("Dados de áudio não podem estar vazios", "EMPTY_AUDIO_DATA")
+                    ErrorResponse("Audio data cannot be empty", "EMPTY_AUDIO_DATA")
                 )
             }
 
@@ -57,7 +57,7 @@ class TranscriptionController(
 
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("Erro ao processar transcrição ao vivo: ${e.message}", "LIVE_TRANSCRIPTION_ERROR"))
+                .body(ErrorResponse("Error processing live transcription: ${e.message}", "LIVE_TRANSCRIPTION_ERROR"))
         }
     }
 
@@ -85,7 +85,7 @@ class TranscriptionController(
             ResponseEntity.noContent().build()
         } catch (e: Exception) {
             ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ErrorResponse("Erro ao deletar transcrição: ${e.message}", "DELETE_ERROR"))
+                .body(ErrorResponse("Error deleting transcription: ${e.message}", "DELETE_ERROR"))
         }
     }
 
